@@ -11,5 +11,13 @@ class DB:
         self.session = Session()
 
     def query(self, cls):
-        return self.session.query(cls)
+        result = []
+        try:
+            result = self.session.query(cls)
+            self.session.commit()
+        except:
+            self.session.rollback()
+            raise
+
+        return result
 
