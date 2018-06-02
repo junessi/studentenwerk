@@ -9,10 +9,11 @@ class WUEins(models.Model):
 
     def __init__(self):
         self.catering_obj = None
+        """
         cq = CateringQuery(catering_id=0)
         for c in cq.doQuery():
             c_obj = Catering(id=c.id, name=c.name)
-            c_obj.save()
+            # c_obj.save()
             for d in c.mealdate:
                 d_obj = MealDate(date_id=d.date_id, catering=c_obj, text=d.text)
                 d_obj.save()
@@ -23,8 +24,12 @@ class WUEins(models.Model):
                     print("    " + str(m_obj))
 
             self.catering_obj = c_obj
+        """
 
-    def serialize(self):
+        caterings = [{"id": 0, "name": "WUEins"},
+                     {"id": 1, "name": "Alte Mensa"}]
+
+    def serialized_data(self):
         return CateringSerializer(instance=self.catering_obj).data
 
 

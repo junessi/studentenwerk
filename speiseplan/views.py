@@ -32,6 +32,6 @@ def speise_plan(request, catering_name):
         """
 
         # print(we.serialize())
-        return JsonResponse(we.serialize(), safe=False)
+        return JsonResponse(we.serialized_data(), safe=False)
         # return JsonResponse(serializer.data, safe=False)
 
