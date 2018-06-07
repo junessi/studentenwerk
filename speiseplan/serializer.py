@@ -14,18 +14,18 @@ class MealSerializer(serializers.Serializer):
 
 class MealDateSerializer(serializers.Serializer):
     text = serializers.CharField(max_length=128)
-    meals_of_mealdate = MealSerializer(many=True)
+    meals_of_mealdate = MealSerializer(many=True, read_only=True)
 
     class Meta:
         model = MealDate
-        fields = ('text', 'meals_of_mealdate')
+        fields = ('text')
 
 
 class CateringSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=128)
-    mealdate = MealDateSerializer(many=True)
+    mealdate = MealDateSerializer(many=True, read_only=True)
     
     class Meta:
         model = Catering
-        fields = ('name', 'mealdate')
+        fields = ('name')
 

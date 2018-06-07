@@ -21,8 +21,11 @@ class MealDateQuery(Query):
         PrimaryKeyConstraint('catering_id', 'date_id'),
     )
 
+    def __init__(self, catering_id):
+        self.catering_id = catering_id
+
     def doQuery(self):
-        return self.query(MealDateQuery).filter_by(catering_id=self.catering.id).all()
+        return self.query(MealDateQuery).filter_by(catering_id=self.catering_id).all()
 
     def __str__(self):
         return "MealDate<{0}, {1}, {2}>".format(self.date_id, self.catering.name, self.text)

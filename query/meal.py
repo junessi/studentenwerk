@@ -18,15 +18,20 @@ class MealQuery(Query):
     price1 = Column(String)
     catering_id = Column(Integer, ForeignKey("catering.id"))
     catering = relationship(CateringQuery, back_populates="meals")
-    date_id = Column(Integer, ForeignKey("date.date_id"))
     mealdate = relationship(MealDateQuery, back_populates="meals")
+    date_id = Column(Integer, ForeignKey("date.date_id"))
 
     __table_args__ = (
         PrimaryKeyConstraint('catering_id', 'date_id', 'meal_id'),
     )
 
+    def __init__(self, catering_id, date_id):
+        self.catering_id = catering_id
+        self.date_id = date_id
+
     def doQuery(self):
-        return self.query(MealQuery).filter_by(mealdate_id=self.mealdate.date_id).all()
+        return self.query(MealQuery).filter_by(catering_id=self.catering_id)\
+                                    .filter_by(date_id=self.date_id).all()
 
     def __str__(self):
         return "Meal<{0}, {1}, {2}, \"{3}\", \"{4}\", \"{5}\">".format(self.catering.id,

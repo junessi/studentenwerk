@@ -5,8 +5,6 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
 from caterings.wueins import WUEins
-from speiseplan.models import Catering, MealDate, Meal
-from speiseplan.serializer import CateringSerializer, MealDateSerializer, MealSerializer
 
 
 @csrf_exempt
@@ -31,7 +29,6 @@ def speise_plan(request, catering_name):
         m1.save()
         """
 
-        # print(we.serialize())
         return JsonResponse(we.serialized_data(), safe=False)
         # return JsonResponse(serializer.data, safe=False)
 
