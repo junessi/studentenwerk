@@ -15,20 +15,5 @@ def speise_plan(request, catering_name):
     if request.method == 'GET':
         we = WUEins()
 
-        """
-        c = Catering(id=0, name="WUEins")
-        c.save()
-        serializer = CateringSerializer(instance=c)
-        md0 = MealDate(catering=c, text="today")
-        md0.save()
-        md1 = MealDate(catering=c, text="tomorrow")
-        md1.save()
-        m0 = Meal(catering=c, mealdate=md0, name="DAN", price0="1", price1="2")
-        m0.save()
-        m1 = Meal(catering=c, mealdate=md0, name="FANQIE", price0="3", price1="4")
-        m1.save()
-        """
-
         return JsonResponse(we.serialized_data(), safe=False)
-        # return JsonResponse(serializer.data, safe=False)
 
