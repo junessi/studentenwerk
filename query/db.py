@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 
 class DB:
     def __init__(self):
-        self.engine = create_engine("mysql+mysqldb://studentenwerk:studentenwerk_pwd@localhost/studentenwerk")
+        self.engine = create_engine("mysql+mysqldb://studentenwerk:studentenwerk_pwd@localhost/studentenwerk", pool_recycle=3600)
         Session = sessionmaker(bind=self.engine)
         self.session = Session()
 
