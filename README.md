@@ -2,6 +2,7 @@
 
 The information of a canteen are constructed in json format, below is an example:
 
+```json
 {
   name: "Mensa WUEins",
   fullname: "Mensa WUEins“,
@@ -41,3 +42,4 @@ The information of a canteen are constructed in json format, below is an example
     ......
   ]
 }
+```
