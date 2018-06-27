@@ -7,17 +7,18 @@ from sqlalchemy.orm import sessionmaker
 class DB:
     def __init__(self):
         self.engine = create_engine("mysql+mysqldb://studentenwerk:studentenwerk_pwd@localhost/studentenwerk", pool_recycle=3600)
-        Session = sessionmaker(bind=self.engine)
-        self.session = Session()
 
     def query(self, cls):
+        Session = sessionmaker(bind=self.engine)
+        session = Session()
         result = []
         try:
-            result = self.session.query(cls)
-            self.session.commit()
+            result = session.query(cls)
+            session.commit()
         except:
-            self.session.rollback()
+            session.rollback()
             raise
+        session.close()
 
         return result
 
