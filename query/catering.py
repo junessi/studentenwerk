@@ -7,18 +7,18 @@ from sqlalchemy.orm import relationship
 from .query import Query
 
 class CateringQuery(Query):
-    __tablename__ = 'catering'
+    __tablename__ = 'canteen'
 
     id = Column(Integer, primary_key = True)
     name = Column(String)
-    meals = relationship("MealQuery", back_populates="catering")
-    mealdate = relationship("MealDateQuery", back_populates="catering")
+    meals = relationship("MealQuery", back_populates="canteen")
+    mealdate = relationship("MealDateQuery", back_populates="canteen")
 
-    def __init__(self, catering_id):
-        self.id = catering_id
+    def __init__(self, canteen_id):
+        self.id = canteen_id
 
     def doQuery(self):
         return self.query(CateringQuery).filter_by(id=self.id).all()
 
     def __str__(self):
-        return "Catering<{0}, \"{1}\">".format(self.id, self.name)
+        return "Canteen<{0}, \"{1}\">".format(self.id, self.name)

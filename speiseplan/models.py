@@ -10,7 +10,7 @@ class Catering(models.Model):
 
 
 class MealDate(models.Model):
-    catering = models.ForeignKey(Catering, related_name='mealdate', on_delete=models.CASCADE)
+    canteen = models.ForeignKey(Catering, related_name='mealdate', on_delete=models.CASCADE)
     text = models.CharField(max_length=128)
 
     def __str__(self):
@@ -18,7 +18,7 @@ class MealDate(models.Model):
 
 
 class Meal(models.Model):
-    catering = models.ForeignKey(Catering, related_name='meals_of_catering', on_delete=models.CASCADE)
+    canteen = models.ForeignKey(Catering, related_name='meals_of_canteen', on_delete=models.CASCADE)
     mealdate = models.ForeignKey(MealDate, related_name='meals_of_mealdate', on_delete=models.CASCADE)
     name = models.CharField(max_length=128)
     price0 = models.CharField(max_length=32)

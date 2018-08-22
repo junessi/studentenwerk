@@ -8,26 +8,26 @@ from speiseplan.serializer import CateringSerializer
 class WUEins(models.Model):
 
     def __init__(self):
-        self.catering_obj = None
-        cq = CateringQuery(catering_id=0)
+        self.canteen_obj = None
+        cq = CateringQuery(canteen_id=0)
         result = cq.doQuery()
         if len(result):
             c = result[0]
-            self.catering_obj = Catering.objects.create(name=c.name)
-            dq = MealDateQuery(catering_id=c.id)
+            self.canteen_obj = Catering.objects.create(name=c.name)
+            dq = MealDateQuery(canteen_id=c.id)
             for d in dq.doQuery():
-                md_obj = MealDate.objects.create(catering=self.catering_obj, text=d.text)
-                mq = MealQuery(catering_id=c.id, date_id=d.date_id)
+                md_obj = MealDate.objects.create(canteen=self.canteen_obj, text=d.text)
+                mq = MealQuery(canteen_id=c.id, date_id=d.date_id)
                 for m in mq.doQuery():
-                    Meal.objects.create(catering=self.catering_obj, \
+                    Meal.objects.create(canteen=self.canteen_obj, \
                                         mealdate=md_obj, \
                                         name=m.name, \
                                         price0=m.price0, \
                                         price1=m.price1)
         else:
-            self.catering_obj = Catering.objects.create(name="Unknown catering")
+            self.canteen_obj = Catering.objects.create(name="Unknown canteen")
 
     def serialized_data(self):
-        return CateringSerializer(instance=self.catering_obj).data
+        return CateringSerializer(instance=self.canteen_obj).data
 
 
