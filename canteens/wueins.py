@@ -1,19 +1,19 @@
 from django.db import models
-from query.catering import CateringQuery
+from query.canteen import CanteenQuery
 from query.mealdate import MealDateQuery
 from query.meal import MealQuery
-from speiseplan.models import Catering, MealDate, Meal
-from speiseplan.serializer import CateringSerializer
+from speiseplan.models import Canteen, MealDate, Meal
+from speiseplan.serializer import CanteenSerializer
 
 class WUEins(models.Model):
 
     def __init__(self):
         self.canteen_obj = None
-        cq = CateringQuery(canteen_id=0)
+        cq = CanteenQuery(canteen_id=0)
         result = cq.doQuery()
         if len(result):
             c = result[0]
-            self.canteen_obj = Catering.objects.create(name=c.name)
+            self.canteen_obj = Canteen.objects.create(name=c.name)
             dq = MealDateQuery(canteen_id=c.id)
             for d in dq.doQuery():
                 md_obj = MealDate.objects.create(canteen=self.canteen_obj, text=d.text)
@@ -25,9 +25,9 @@ class WUEins(models.Model):
                                         price0=m.price0, \
                                         price1=m.price1)
         else:
-            self.canteen_obj = Catering.objects.create(name="Unknown canteen")
+            self.canteen_obj = Canteen.objects.create(name="Unknown canteen")
 
     def serialized_data(self):
-        return CateringSerializer(instance=self.canteen_obj).data
+        return CanteenSerializer(instance=self.canteen_obj).data
 
 

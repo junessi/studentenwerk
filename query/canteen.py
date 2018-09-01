@@ -6,7 +6,7 @@ from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 from .query import Query
 
-class CateringQuery(Query):
+class CanteenQuery(Query):
     __tablename__ = 'canteen'
 
     id = Column(Integer, primary_key = True)
@@ -18,7 +18,7 @@ class CateringQuery(Query):
         self.id = canteen_id
 
     def doQuery(self):
-        return self.query(CateringQuery).filter_by(id=self.id).all()
+        return self.query(CanteenQuery).filter_by(id=self.id).all()
 
     def __str__(self):
         return "Canteen<{0}, \"{1}\">".format(self.id, self.name)

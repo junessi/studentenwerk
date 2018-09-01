@@ -2,7 +2,7 @@ from django.db import models
 from pygments.lexers import get_all_lexers
 from pygments.styles import get_all_styles
 
-class Catering(models.Model):
+class Canteen(models.Model):
     name = models.CharField(max_length=128, default=0)
 
     def __unicode__(self):
@@ -10,7 +10,7 @@ class Catering(models.Model):
 
 
 class MealDate(models.Model):
-    canteen = models.ForeignKey(Catering, related_name='mealdate', on_delete=models.CASCADE)
+    canteen = models.ForeignKey(Canteen, related_name='mealdate', on_delete=models.CASCADE)
     text = models.CharField(max_length=128)
 
     def __str__(self):
@@ -18,7 +18,7 @@ class MealDate(models.Model):
 
 
 class Meal(models.Model):
-    canteen = models.ForeignKey(Catering, related_name='meals_of_canteen', on_delete=models.CASCADE)
+    canteen = models.ForeignKey(Canteen, related_name='meals_of_canteen', on_delete=models.CASCADE)
     mealdate = models.ForeignKey(MealDate, related_name='meals_of_mealdate', on_delete=models.CASCADE)
     name = models.CharField(max_length=128)
     price0 = models.CharField(max_length=32)

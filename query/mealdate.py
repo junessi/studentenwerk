@@ -4,7 +4,7 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, ForeignKey, PrimaryKeyConstraint
 from sqlalchemy.orm import relationship
-from .catering import CateringQuery
+from .canteen import CanteenQuery
 from .query import Query
 
 Base = declarative_base()
@@ -14,7 +14,7 @@ class MealDateQuery(Query):
     date_id = Column(Integer)
     text = Column(String)
     canteen_id = Column(Integer, ForeignKey("canteen.id"))
-    canteen = relationship(CateringQuery, back_populates="mealdate")
+    canteen = relationship(CanteenQuery, back_populates="mealdate")
     meals = relationship("MealQuery", back_populates="mealdate")
 
     __table_args__ = (
