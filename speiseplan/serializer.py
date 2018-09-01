@@ -1,5 +1,5 @@
 from rest_framework import serializers, fields
-from speiseplan.models import Catering, MealDate, Meal
+from speiseplan.models import Canteen, MealDate, Meal
 
 
 class MealSerializer(serializers.Serializer):
@@ -21,11 +21,11 @@ class MealDateSerializer(serializers.Serializer):
         fields = ('text')
 
 
-class CateringSerializer(serializers.Serializer):
+class CanteenSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=128)
     mealdate = MealDateSerializer(many=True, read_only=True)
     
     class Meta:
-        model = Catering
+        model = Canteen
         fields = ('name')
 

@@ -4,7 +4,7 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, ForeignKey, PrimaryKeyConstraint
 from sqlalchemy.orm import relationship
-from .catering import CateringQuery
+from .canteen import CanteenQuery
 from .query import Query
 
 Base = declarative_base()
@@ -13,19 +13,19 @@ class MealDateQuery(Query):
 
     date_id = Column(Integer)
     text = Column(String)
-    catering_id = Column(Integer, ForeignKey("catering.id"))
-    catering = relationship(CateringQuery, back_populates="mealdate")
+    canteen_id = Column(Integer, ForeignKey("canteen.id"))
+    canteen = relationship(CanteenQuery, back_populates="mealdate")
     meals = relationship("MealQuery", back_populates="mealdate")
 
     __table_args__ = (
-        PrimaryKeyConstraint('catering_id', 'date_id'),
+        PrimaryKeyConstraint('canteen_id', 'date_id'),
     )
 
-    def __init__(self, catering_id):
-        self.catering_id = catering_id
+    def __init__(self, canteen_id):
+        self.canteen_id = canteen_id
 
     def doQuery(self):
-        return self.query(MealDateQuery).filter_by(catering_id=self.catering_id).all()
+        return self.query(MealDateQuery).filter_by(canteen_id=self.canteen_id).all()
 
     def __str__(self):
-        return "MealDate<{0}, {1}, {2}>".format(self.date_id, self.catering.name, self.text)
+        return "MealDate<{0}, {1}, {2}>".format(self.date_id, self.canteen.name, self.text)
