@@ -3,7 +3,14 @@ from pygments.lexers import get_all_lexers
 from pygments.styles import get_all_styles
 
 class Canteen(models.Model):
-    name = models.CharField(max_length=128, default=0)
+    name = models.CharField(max_length=255, default=0)
+    fullname = models.CharField(max_length=255, default=0)
+    address = models.CharField(max_length=255, default=0)
+    city = models.CharField(max_length=255, default=0)
+    detail = models.CharField(max_length=255, default=0)
+    opentimes = models.CharField(max_length=255, default=0)
+    contact = models.CharField(max_length=255, default=0)
+    logourl = models.CharField(max_length=255, default=0)
 
     def __unicode__(self):
         return "{0}".format(self.name)

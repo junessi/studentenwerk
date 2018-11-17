@@ -11,6 +11,13 @@ class CanteenQuery(Query):
 
     id = Column(Integer, primary_key = True)
     name = Column(String)
+    fullname = Column(String)
+    address = Column(String)
+    city = Column(String)
+    detail = Column(String)
+    opentimes = Column(String)
+    contact = Column(String)
+    logourl = Column(String)
     meals = relationship("MealQuery", back_populates="canteen")
     mealdate = relationship("MealDateQuery", back_populates="canteen")
 
