@@ -22,10 +22,19 @@ class MealDateSerializer(serializers.Serializer):
 
 
 class CanteenSerializer(serializers.Serializer):
-    name = serializers.CharField(max_length=128)
-    mealdate = MealDateSerializer(many=True, read_only=True)
+    name = serializers.CharField(max_length=255)
+    fullname = serializers.CharField(max_length=255)
+    address = serializers.CharField(max_length=255)
+    city = serializers.CharField(max_length=255)
+    detail = serializers.CharField(max_length=255)
+    opentimes = serializers.CharField(max_length=255)
+    contact = serializers.CharField(max_length=255)
+    logourl = serializers.CharField(max_length=255)
+    # mealdate = MealDateSerializer(many=True, read_only=True)
     
+    """
     class Meta:
         model = Canteen
         fields = ('name')
+        """
 

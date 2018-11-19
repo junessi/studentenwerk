@@ -17,10 +17,11 @@ class WUEins(models.Model):
                                                       fullname=c.fullname,
                                                       address=c.address,
                                                       city=c.city,
-                                                      details=c.details,
+                                                      detail=c.detail,
                                                       opentimes=c.opentimes,
                                                       contact=c.contact,
                                                       logourl=c.logourl)
+            """
             dq = MealDateQuery(canteen_id=c.id)
             for d in dq.doQuery():
                 md_obj = MealDate.objects.create(canteen=self.canteen_obj, text=d.text)
@@ -31,6 +32,7 @@ class WUEins(models.Model):
                                         name=m.name, \
                                         price0=m.price0, \
                                         price1=m.price1)
+            """
         else:
             self.canteen_obj = Canteen.objects.create(name="Unknown canteen")
 
