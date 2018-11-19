@@ -10,7 +10,7 @@ from canteens.wueins import WUEins
 @csrf_exempt
 def canteen_details(request, canteen_name):
     """
-    List all code meals
+    List canteen details
     """
     if request.method == 'GET':
         we = WUEins()
@@ -20,9 +20,10 @@ def canteen_details(request, canteen_name):
 @csrf_exempt
 def canteen_meals(request, canteen_name, meal_query):
     """
-    List all code meals
+    Query meals of a canteen with condition
     """
     if request.method == 'GET':
+        print(meal_query)
         we = WUEins()
 
         return JsonResponse(we.serialized_data(), safe=False)
