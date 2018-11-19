@@ -8,7 +8,17 @@ from canteens.wueins import WUEins
 
 
 @csrf_exempt
-def speise_plan(request, canteen_name):
+def canteen_details(request, canteen_name):
+    """
+    List all code meals
+    """
+    if request.method == 'GET':
+        we = WUEins()
+
+        return JsonResponse(we.serialized_data(), safe=False)
+
+@csrf_exempt
+def canteen_meals(request, canteen_name, meal_query):
     """
     List all code meals
     """
