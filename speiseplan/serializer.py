@@ -13,6 +13,7 @@ class MealSerializer(serializers.Serializer):
 
 
 class MealDateSerializer(serializers.Serializer):
+    date_id = serializers.IntegerField()
     text = serializers.CharField(max_length=128)
     meals_of_mealdate = MealSerializer(many=True, read_only=True)
 
@@ -30,7 +31,7 @@ class CanteenSerializer(serializers.Serializer):
     opentimes = serializers.CharField(max_length=255)
     contact = serializers.CharField(max_length=255)
     logourl = serializers.CharField(max_length=255)
-    # mealdate = MealDateSerializer(many=True, read_only=True)
+    mealdate = MealDateSerializer(many=True, read_only=True)
     
     """
     class Meta:

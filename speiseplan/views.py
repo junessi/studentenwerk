@@ -18,13 +18,12 @@ def canteen_details(request, canteen_name):
         return JsonResponse(we.serialized_data(), safe=False)
 
 @csrf_exempt
-def canteen_meals(request, canteen_name, meal_query):
+def canteen_meals(request, canteen_name, date_range):
     """
     Query meals of a canteen with condition
     """
     if request.method == 'GET':
-        print(meal_query)
-        we = WUEins()
+        we = WUEins(date_range)
 
         return JsonResponse(we.serialized_data(), safe=False)
 

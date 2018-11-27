@@ -27,5 +27,11 @@ class MealDateQuery(Query):
     def doQuery(self):
         return self.query(MealDateQuery).filter_by(canteen_id=self.canteen_id).all()
 
+    def doQuery(self, date_range):
+        if len(date_range) != 2:
+            return self.doQuery()
+
+        return self.query(MealDateQuery).filter_by(canteen_id=self.canteen_id).filter(MealDateQuery.date_id.between(date_range[0], date_range[1])).all()
+
     def __str__(self):
         return "MealDate<{0}, {1}, {2}>".format(self.date_id, self.canteen.name, self.text)
