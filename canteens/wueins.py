@@ -4,7 +4,7 @@ from query.mealdate import MealDateQuery
 from query.meal import MealQuery
 from speiseplan.models import Canteen, MealDate, Meal
 from speiseplan.serializer import CanteenSerializer
-import datetime
+import canteens.utils as utils
 
 class WUEins(models.Model):
 
@@ -24,7 +24,7 @@ class WUEins(models.Model):
                                                       logourl=c.logourl)
 
             if date_query is not None:
-                date_range_int = self.parse_date(date_query)
+                date_range_int = utils.parse_date(date_query)
                 print(date_range_int)
                 dq = MealDateQuery(canteen_id=c.id)
                 for d in dq.doQuery(date_range_int):
@@ -42,21 +42,3 @@ class WUEins(models.Model):
     def serialized_data(self):
         return CanteenSerializer(instance=self.canteen_obj).data
 
-
-    def parse_date(self, date_query):
-        weekday = datetime.datetime.today().weekday()
-        monday = datetime.datetime.today() - datetime.timedelta(days = weekday)
-        sonday = monday + datetime.timedelta(days = 6)
-        monday_int = int("{0}{1}{2:02d}".format(monday.year, monday.month, monday.day))
-        sonday_int = int("{0}{1}{2:02d}".format(sonday.year, sonday.month, sonday.day))
-
-        date_range = [monday_int, sonday_int]
-        
-        date_range_str = str(date_query)
-        if len(date_range_str) > 0:
-            if date_range_str == "today":
-                today = datetime.datetime.today()
-                today_int = int("{0}{1}{2:02d}".format(today.year, today.month, today.day))
-                date_range = [today_int, today_int]
-
-        return date_range
