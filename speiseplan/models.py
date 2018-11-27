@@ -17,6 +17,7 @@ class Canteen(models.Model):
 
 
 class MealDate(models.Model):
+    date_id = models.IntegerField(default=19700101)
     canteen = models.ForeignKey(Canteen, related_name='mealdate', on_delete=models.CASCADE)
     text = models.CharField(max_length=128)
 
