@@ -7,7 +7,7 @@ from sqlalchemy.orm import relationship
 from .query import Query
 
 class CanteenQuery(Query):
-    __tablename__ = 'canteen'
+    __tablename__ = "canteen"
 
     id = Column(Integer, primary_key = True)
     name = Column(String)

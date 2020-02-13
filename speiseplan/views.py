@@ -1,29 +1,32 @@
 import json
+import requests
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.renderers import JSONRenderer
-from rest_framework.parsers import JSONParser
-from canteens.wueins import WUEins
 
+base_url = "http://127.0.0.1/redirect/studentenwerk_openmensa_api/openmensa/v2"
 
-@csrf_exempt
-def canteen_details(request, canteen_name):
-    """
-    List canteen details
-    """
-    if request.method == 'GET':
-        we = WUEins()
+def list_canteens(request):
+    url = base_url + "/canteens"
 
-        return JsonResponse(we.serialized_data(), safe=False)
+    return HttpResponse(requests.get(url))
 
-@csrf_exempt
-def canteen_meals(request, canteen_name, date_range):
-    """
-    Query meals of a canteen with condition
-    """
-    if request.method == 'GET':
-        we = WUEins(date_range)
+def canteen_info(request, canteen_id):
+    url = base_url + "/canteens/" + canteen_id
 
-        return JsonResponse(we.serialized_data(), safe=False)
+    return HttpResponse(requests.get(url))
+
+def canteen_dates(request, canteen_id, date):
+    url = base_url + "/canteens/" + canteen_id + "/days/" + date
+
+    return HttpResponse(requests.get(url))
+
+def canteen_meals(request, canteen_id, date):
+    url = base_url + "/canteens/" + canteen_id + "/days/" + date + "/meals/"
+
+    return HttpResponse(requests.get(url))
+
+def canteen_meal_detail(request, canteen_id, date, meal_id):
+    url = base_url + "/canteens/" + canteen_id + "/days/" + date + "/meals/" + meal_id
+
+    return HttpResponse(requests.get(url))
 
