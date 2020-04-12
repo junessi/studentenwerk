@@ -22,3 +22,33 @@ class DB:
 
         return result
 
+    def save(self, obj):
+        ret = False
+        Session = sessionmaker(bind=self.engine)
+        session = Session()
+        result = []
+        try:
+            session.add(obj)
+            session.commit()
+            ret = True
+        except:
+            session.rollback()
+            raise
+        session.close()
+
+        return ret
+
+    def update(self, cls, id, data):
+        Session = sessionmaker(bind=self.engine)
+        session = Session()
+        result = []
+        try:
+            result = session.query(cls).filter(cls.id == id).update(data)
+            session.commit()
+        except:
+            session.rollback()
+            raise
+        session.close()
+
+        return result
+

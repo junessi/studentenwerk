@@ -2,41 +2,33 @@
 #coding=utf-8
 
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, ForeignKey, Table, PrimaryKeyConstraint
+from sqlalchemy import Column, Integer, String, Binary, ForeignKey, Table, PrimaryKeyConstraint
 from sqlalchemy.orm import relationship
 from .query import Query
-from .canteen import CanteenQuery
-from .mealdate import MealDateQuery
+import array
 
 
-class MealQuery(Query):
+class Meal(Query):
     __tablename__ = 'meal'
 
-    meal_id = Column(Integer)
-    name = Column(String)
-    price0 = Column(String)
-    price1 = Column(String)
-    canteen_id = Column(Integer, ForeignKey("canteen.id"))
-    canteen = relationship(CanteenQuery, back_populates="meals")
-    mealdate = relationship(MealDateQuery, back_populates="meals")
-    date_id = Column(Integer, ForeignKey("date.date_id"))
+    id = Column(Integer, primary_key = True)
+    liked_users = Column(Binary)
 
-    __table_args__ = (
-        PrimaryKeyConstraint('canteen_id', 'date_id', 'meal_id'),
-    )
+    def __init__(self, id):
+        self.id = id
+        self.liked_users = array.array('L', [])
 
-    def __init__(self, canteen_id, date_id):
-        self.canteen_id = canteen_id
-        self.date_id = date_id
+    def dict(self):
+        return { "id": self.id, "liked_users": array.array('L', self.liked_users).tolist() }
 
-    def doQuery(self):
-        return self.query(MealQuery).filter_by(canteen_id=self.canteen_id)\
-                                    .filter_by(date_id=self.date_id).all()
+    def query_meal(self):
+        return self.query(Meal).filter_by(id=self.id).all()
 
-    def __str__(self):
-        return "Meal<{0}, {1}, {2}, \"{3}\", \"{4}\", \"{5}\">".format(self.canteen.id,
-                                                             self.mealdate.date_id,
-                                                             self.meal_id,
-                                                             self.canteen.name,
-                                                             self.mealdate.text,
-                                                             self.name)
+    def update_data(self):
+        self.update(Meal, self.id, {"liked_users": self.liked_users})
+
+
+class MealQuery:
+    def get_meal(self, meal_id):
+        return Meal(meal_id).query_meal()
+

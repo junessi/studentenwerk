@@ -12,3 +12,9 @@ class Query(Base):
 
     def query(self, cls):
         return Query.db.query(cls)
+
+    def save(self,):
+        return Query.db.save(self)
+
+    def update(self, cls, id, data):
+        return Query.db.update(cls, id, data)
