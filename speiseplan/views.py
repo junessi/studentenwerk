@@ -109,7 +109,7 @@ def canteen_meal_detail(request, canteen_id, date, meal_id):
                     meal_info["liked"] = True
 
                     updated = True
-            elif request.GET["action"] == "unlike":
+            elif request.GET["action"] == "dislike":
                 if int(request.GET["wechat_uid"]) in liked_users:
                     liked_users.remove(int(request.GET["wechat_uid"]))
 
