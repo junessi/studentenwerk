@@ -1,14 +1,11 @@
 from django.conf import settings
-from django.db import models
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from query.user import UserQuery, User
-import canteens.utils as utils
 import wechat.error as error
 import requests
-import redis
-import time
 import hashlib
+import redis_query.query as RedisQuery
 
 def verify_user(key, data, signature):
      buf = "{0}{1}".format(data, key)
@@ -19,6 +16,8 @@ def user_login(request):
     resp = error.NotFound().dict()
     APP_ID = settings.WECHAT_APP_ID
     APP_SECRET = settings.WECHAT_APP_SECRET
+
+    rUser = RedisQuery.RedisUser()
 
     if "code" in request.POST:
         resp = error.StatusOK().dict()
@@ -58,6 +57,12 @@ def user_login(request):
                 resp["user"]["id"] = user.id
     else:
         resp["message"] = "code is not provided"
+        u = RedisQuery.find_user(0)
+        if u is not None:
+            resp["redisUser"] = u.toDict()
+        else:
+            resp["redisUser"] = "not found"
 
     return JsonResponse(resp)
+
 
