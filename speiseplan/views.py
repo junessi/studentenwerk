@@ -4,6 +4,7 @@ import array
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from query.meal import MealQuery, Meal
+from django.views.decorators.csrf import csrf_exempt
 
 base_url = "https://api.studentenwerk-dresden.de/openmensa/v2"
 
@@ -125,12 +126,12 @@ def canteen_meal_detail(request, canteen_id, date, meal_id):
 
 def likes(request, canteen_id, date, meal_id):
     
-    liked_users = []
+    resp = {"status": 200, "liked_users": []}
     result = MealQuery().get_meal(meal_id)
 
     if len(result):
         meal = result[0]
-        liked_users = array.array('L', meal.liked_users).tolist()
+        resp["liked_users"] = array.array('L', meal.liked_users).tolist()
 
-    return JsonResponse({"status": 200, "liked_users": liked_users}, safe = False)
+    return JsonResponse(resp, safe = False)
 
