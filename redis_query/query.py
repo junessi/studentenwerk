@@ -24,16 +24,38 @@ app_prefix = "ddmensa_wechat_uid_"
 
 def save_user(user):
     r = redis.Redis()
-    app_uid = app_prefix + user.id
-    r.hmset(app_uid, user.toDict())
+    app_uid = app_prefix + str(user.id)
+    if user.id:
+        r.hset(app_uid, "id", user.id)
 
+    if user.openid:
+        r.hset(app_uid, "openid", user.openid)
 
-def find_user(uid):
+    if user.session_key:
+        r.hset(app_uid, "session_key", user.session_key)
+
+    if user.raw_data:
+        r.hset(app_uid, "raw_data", user.raw_data)
+
+    if user.signature:
+        r.hset(app_uid, "signature", user.signature)
+
+    if user.token:
+        r.hset(app_uid, "token", user.token)
+
+def user_exists(uid):
     r = redis.Redis()
-    user = RedisUser()
     app_uid = app_prefix + str(uid)
     uid = r.hget(app_uid, "id")
-    if uid is not None:
+
+    return uid != None
+
+def find_user(uid):
+    if user_exists(uid):
+        r = redis.Redis()
+        user = RedisUser()
+        app_uid = app_prefix + str(uid)
+        uid = r.hget(app_uid, "id")
         user.id = int(uid)
 
         openid = r.hget(app_uid, "openid")
@@ -59,3 +81,11 @@ def find_user(uid):
         return user
 
     return None
+
+def verify_token(uid, token):
+    user = find_user(uid)
+    if user is not None and user.token == token:
+        return True
+
+    return False
+

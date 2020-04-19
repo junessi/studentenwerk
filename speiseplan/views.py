@@ -1,6 +1,8 @@
 import json
 import requests
 import array
+import common.errors as errors
+import redis_query.query as RedisQuery
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from query.meal import MealQuery, Meal
@@ -67,6 +69,7 @@ def canteen_meals(request, canteen_id, date):
 
     return JsonResponse(meals, safe = False)
 
+@csrf_exempt
 def canteen_meal_detail(request, canteen_id, date, meal_id):
     # url = base_url + "/canteens/" + canteen_id + "/days/" + date + "/meals/" + meal_id
     # meal_info = requests.get(url).json()
@@ -103,16 +106,25 @@ def canteen_meal_detail(request, canteen_id, date, meal_id):
         meal = result[0]
         liked_users = array.array('L', meal.liked_users).tolist()
 
-        if "action" in request.GET and "wechat_uid" in request.GET:
-            if request.GET["action"] == "like":
-                if int(request.GET["wechat_uid"]) not in liked_users:
-                    liked_users.append(int(request.GET["wechat_uid"]))
+        if {"action", "wechat_uid", "token"} <= set(request.POST):
+            action = request.POST["action"] 
+            uid = int(request.POST["wechat_uid"]) 
+            token = request.POST["token"] 
+            meal_info["action"] = action
+
+            # verify user token
+            if RedisQuery.verify_token(uid, token) == False:
+                return JsonResponse(errors.InvalidToken().dict())
+
+            if action == "like":
+                if uid not in liked_users:
+                    liked_users.append(uid)
                     meal_info["liked"] = True
 
                     updated = True
-            elif request.GET["action"] == "dislike":
-                if int(request.GET["wechat_uid"]) in liked_users:
-                    liked_users.remove(int(request.GET["wechat_uid"]))
+            elif action == "dislike":
+                if uid in liked_users:
+                    liked_users.remove(uid)
 
                     updated = True
 
@@ -122,6 +134,7 @@ def canteen_meal_detail(request, canteen_id, date, meal_id):
 
         meal_info["likes"] = len(liked_users)
 
+    meal_info["status"] = 200
     return JsonResponse(meal_info, safe = False)
 
 def likes(request, canteen_id, date, meal_id):
