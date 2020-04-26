@@ -34,12 +34,14 @@ def canteen_date(request, canteen_id, date):
 
     return JsonResponse(requests.get(url).json(), safe = False)
 
+@csrf_exempt
 def canteen_meals(request, canteen_id, date):
     # url = base_url + "/canteens/" + canteen_id + "/days/" + date + "/meals/"
     # meals = requests.get(url).json()
 
     meals = [{ "id": 260,
                     "name": "Gemüse-Couscouspfanne mit Joghurt-Ingwer-Dip, dazu bunter Blattsalat",
+                    "image": "https://static.studentenwerk-dresden.de/bilder/mensen/studentenwerk-dresden-lieber-mensen-gehen.jpg",
                     "notes": ["ovo-lacto-vegetabil", "mensaVital"],
                     "prices": {"students": 2.3, "employees": 3.65, "others": 4.6},
                     "category": "Alternativ-Angebot",
@@ -48,6 +50,7 @@ def canteen_meals(request, canteen_id, date):
                  {
                     "id": 10900,
                     "name": "Hähnchenschnitzel mit Brötchen",
+                    "image": "https://static.studentenwerk-dresden.de/bilder/mensen/studentenwerk-dresden-lieber-mensen-gehen.jpg",
                     "notes": [],
                     "prices": { "pupils": 2.4, "others": 4.3},
                     "category": "Cafeteria Heiße Theke",
@@ -58,11 +61,23 @@ def canteen_meals(request, canteen_id, date):
     for m in meals:
         result = MealQuery().get_meal(m["id"])
         if len(result):
+            uid = 0 # id == 0 is reserved
+            token = ""
+
+            if "wechat_uid" in request.POST and len(request.POST["wechat_uid"]):
+                uid = int(request.POST["wechat_uid"])
+
+            if "token" in request.POST:
+                token = request.POST["token"]
+
             liked_users = array.array('L', result[0].liked_users).tolist()
-            m["liked"] = False
             m["likes"] = len(liked_users)
-            if "wechat_uid" in request.GET and int(request.GET["wechat_uid"]) in liked_users:
-                m["liked"] = True
+            if RedisQuery.verify_token(uid, token):
+                if uid in liked_users:
+                    m["liked"] = True
+            else:
+                # show static values for not logged in users
+                m["liked"] = False
         else:
             meal = Meal(m["id"])
             meal.save()
@@ -79,6 +94,7 @@ def canteen_meal_detail(request, canteen_id, date, meal_id):
         meal_info = {
                         "id": 260,
                         "name": "Gemüse-Couscouspfanne mit Joghurt-Ingwer-Dip, dazu bunter Blattsalat",
+                        "image": "https://static.studentenwerk-dresden.de/bilder/mensen/studentenwerk-dresden-lieber-mensen-gehen.jpg",
                         "notes": ["ovo-lacto-vegetabil", "mensaVital"],
                         "prices": {"students": 2.3, "employees": 3.65, "others": 4.6},
                         "category": "Alternativ-Angebot",
@@ -89,6 +105,7 @@ def canteen_meal_detail(request, canteen_id, date, meal_id):
         meal_info = {
                         "id": 10900,
                         "name": "Hähnchenschnitzel mit Brötchen",
+                        "image": "https://static.studentenwerk-dresden.de/bilder/mensen/studentenwerk-dresden-lieber-mensen-gehen.jpg",
                         "notes": [],
                         "prices": { "pupils": 2.4, "others": 4.3},
                         "category": "Cafeteria Heiße Theke",
