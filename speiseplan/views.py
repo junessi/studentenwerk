@@ -165,3 +165,16 @@ def likes(request, canteen_id, date, meal_id):
 
     return JsonResponse(resp, safe = False)
 
+def canteen_comments(request, canteenid):
+    comments = {
+        4: ["今天老食堂有番茄炒蛋噢", "今天的苹果派超级恶心", "意大利面好吃！", "Wok有炒面"],
+        29: ["沸点食堂有汉堡", "沙拉很棒", "今天没啥好吃的"]
+    }
+
+    resp = {"status": 200, "comments": []}
+    if canteenid in comments:
+        resp = comments[canteenid]
+    else:
+        resp = errors.NotFound("Canteen not found").dict()
+
+    return JsonResponse(resp, safe = False)
