@@ -10,5 +10,6 @@ urlpatterns = [
     re_path(r'^(?P<canteen_id>[\d]+)/days/(?P<date>[\d]{4}-[\d]{2}-[\d]{2})/meals/$', views.canteen_meals),
     re_path(r'^(?P<canteen_id>[\d]+)/days/(?P<date>[\d]{4}-[\d]{2}-[\d]{2})/meals/(?P<meal_id>[\d]+)/$', views.canteen_meal_detail),
     re_path(r'^(?P<canteen_id>[\d]+)/days/(?P<date>[\d]{4}-[\d]{2}-[\d]{2})/meals/(?P<meal_id>[\d]+)/likes$', views.likes),
-    re_path(r'^(?P<canteen_id>[\d]+)/comments$', views.canteen_comments),
+    re_path(r'^(?P<canteen_id>[\d]+)/comments$', views.get_canteen_comments),
+    re_path(r'^(?P<canteen_id>[\d]+)/addcomment/$', views.add_canteen_comment),
 ]

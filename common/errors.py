@@ -1,8 +1,12 @@
 class StatusOK:
-    def __init__(self):
+    def __init__(self, message = ""):
         self.data = {"status": 200}
+        self.message = message
 
     def dict(self):
+        if len(self.message):
+            self.data["message"] = self.message
+
         return self.data
 
 

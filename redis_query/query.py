@@ -20,11 +20,14 @@ class RedisUser:
         }
 
 
-app_prefix = "ddmensa_wechat_uid_"
+prefix_app = "ddmensa_"
+prefix_wechatuid = prefix_app + "wechat_uid_"
+prefix_comment_canteenid = prefix_app + "comment_canteenid_"
+MAX_COMMENTS_NUM = 10
 
 def save_user(user):
     r = redis.Redis()
-    app_uid = app_prefix + str(user.id)
+    app_uid = prefix_wechatuid + str(user.id)
     if user.id:
         r.hset(app_uid, "id", user.id)
 
@@ -45,7 +48,7 @@ def save_user(user):
 
 def user_exists(uid):
     r = redis.Redis()
-    app_uid = app_prefix + str(uid)
+    app_uid = prefix_wechatuid + str(uid)
     uid = r.hget(app_uid, "id")
 
     return uid != None
@@ -54,7 +57,7 @@ def find_user(uid):
     if user_exists(uid):
         r = redis.Redis()
         user = RedisUser()
-        app_uid = app_prefix + str(uid)
+        app_uid = prefix_wechatuid + str(uid)
         uid = r.hget(app_uid, "id")
         user.id = int(uid)
 
@@ -89,3 +92,32 @@ def verify_token(uid, token):
 
     return False
 
+def get_canteen_comments(cid, num = MAX_COMMENTS_NUM):
+    try:
+        r = redis.Redis()
+        cid = int(cid)
+        key = "{0}{1}".format(prefix_comment_canteenid, cid)
+        if num < 1:
+            num = MAX_COMMENTS_NUM
+
+        comments = []
+        for c in r.lrange(key, 0, num):
+            comments.append(c.decode('utf-8'))
+
+        return comments
+    except:
+        return []
+
+def add_canteen_comment(cid, comment):
+    try:
+        r = redis.Redis()
+        cid = int(cid)
+        key = "{0}{1}".format(prefix_comment_canteenid, cid)
+        r.lpush(key, comment)
+
+        if r.llen(key) > MAX_COMMENTS_NUM:
+            r.rpop(key)
+
+        return True
+    except:
+        return False

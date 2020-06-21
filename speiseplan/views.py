@@ -23,11 +23,7 @@ def canteen_info(request, canteen_id):
 def canteen_dates(request, canteen_id):
     url = base_url + "/canteens/" + canteen_id + "/days/"
 
-    days = requests.get(url).json()
-    for day in days:
-        day["closed"] = False
-    return JsonResponse(days, safe = False)
-    # return JsonResponse(requests.get(url).json(), safe = False)
+    return JsonResponse(requests.get(url).json(), safe = False)
 
 def canteen_date(request, canteen_id, date):
     url = base_url + "/canteens/" + canteen_id + "/days/" + date
@@ -36,9 +32,10 @@ def canteen_date(request, canteen_id, date):
 
 @csrf_exempt
 def canteen_meals(request, canteen_id, date):
-    # url = base_url + "/canteens/" + canteen_id + "/days/" + date + "/meals/"
-    # meals = requests.get(url).json()
+    url = base_url + "/canteens/" + canteen_id + "/days/" + date + "/meals/"
+    meals = requests.get(url).json()
 
+    """
     meals = [{ "id": 260,
                     "name": "Gemüse-Couscouspfanne mit Joghurt-Ingwer-Dip, dazu bunter Blattsalat",
                     "image": "https://static.studentenwerk-dresden.de/bilder/mensen/studentenwerk-dresden-lieber-mensen-gehen.jpg",
@@ -56,6 +53,7 @@ def canteen_meals(request, canteen_id, date):
                     "category": "Cafeteria Heiße Theke",
                     "likes": 0
                  }]
+    """
 
     # extend meal info
     for m in meals:
@@ -86,9 +84,10 @@ def canteen_meals(request, canteen_id, date):
 
 @csrf_exempt
 def canteen_meal_detail(request, canteen_id, date, meal_id):
-    # url = base_url + "/canteens/" + canteen_id + "/days/" + date + "/meals/" + meal_id
-    # meal_info = requests.get(url).json()
+    url = base_url + "/canteens/" + canteen_id + "/days/" + date + "/meals/" + meal_id
+    meal_info = requests.get(url).json()
 
+    """
     meal_info = {"status": 404, "message": "meal not found"}
     if int(meal_id) == 260:
         meal_info = {
@@ -111,6 +110,7 @@ def canteen_meal_detail(request, canteen_id, date, meal_id):
                         "category": "Cafeteria Heiße Theke",
                         "likes": 0
                      }
+                     """
 
     meal_info["likes"] = 0
     meal_info["liked"] = False
@@ -131,7 +131,7 @@ def canteen_meal_detail(request, canteen_id, date, meal_id):
 
             # verify user token
             if RedisQuery.verify_token(uid, token) == False:
-                return JsonResponse(errors.InvalidToken().dict())
+                return JsonResponse(errors.InvalidToken().dict(), safe = False)
 
             if action == "like":
                 if uid not in liked_users:
@@ -165,16 +165,37 @@ def likes(request, canteen_id, date, meal_id):
 
     return JsonResponse(resp, safe = False)
 
-def canteen_comments(request, canteen_id):
+def get_canteen_comments(request, canteen_id):
+    """
     comments = {
         4: ["今天老食堂有番茄炒蛋噢", "今天的苹果派超级恶心", "意大利面好吃！", "Wok有炒面"],
         29: ["沸点食堂有汉堡", "沙拉很棒", "今天没啥好吃的"]
     }
+    """
 
-    resp = {"status": 200, "comments": []}
-    if int(canteen_id) in comments:
-        resp = comments[int(canteen_id)]
-    else:
-        resp = errors.NotFound("Canteen not found").dict()
+    return JsonResponse(RedisQuery.get_canteen_comments(canteen_id), safe = False)
 
-    return JsonResponse(resp, safe = False)
+@csrf_exempt
+def add_canteen_comment(request, canteen_id):
+    if {"wechat_uid", "token", "comment"} > set(request.POST):
+        return JsonResponse(errors.StatusError("missing argument").dict(), safe = False)
+
+    try:
+        uid = int(request.POST["wechat_uid"])
+        if uid < 1:
+            raise Exception("invalid wechat uid")
+    except Exception as e:
+        return JsonResponse(errors.StatusError(str(e)).dict(), safe = False)
+
+    token = request.POST["token"] 
+    comment = request.POST["comment"] 
+
+    # verify user token
+    if RedisQuery.verify_token(uid, token) == False:
+        return JsonResponse(errors.InvalidToken().dict(), safe = False)
+
+    if RedisQuery.add_canteen_comment(canteen_id, comment) == False:
+        return JsonResponse(errors.StatusError("failed to add comment").dict(), safe = False)
+
+    return JsonResponse(errors.StatusOK("one comment added").dict(), safe = False)
+
