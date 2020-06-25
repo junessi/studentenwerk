@@ -1,5 +1,5 @@
 from rest_framework import serializers, fields
-from speiseplan.models import Canteen, MealDate, Meal
+from canteens.models import Canteen, MealDate, Meal
 
 
 class MealSerializer(serializers.Serializer):

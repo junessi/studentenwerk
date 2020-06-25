@@ -1,9 +1,5 @@
-from django.db import models
 from query.user import UserQuery
-from speiseplan.models import Canteen, MealDate, Meal
-from speiseplan.serializer import CanteenSerializer
-from django.http import HttpResponse, JsonResponse
-import canteens.utils as utils
+from django.http import JsonResponse
 import common.errors as errors
 
 def get_user_info(request, user_id):

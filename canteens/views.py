@@ -55,6 +55,9 @@ def canteen_meals(request, canteen_id, date):
                  }]
     """
 
+    if type(meals) is dict and {"status", "message"} <= set(meals):
+        return JsonResponse(meals, safe = False)
+
     # extend meal info
     for m in meals:
         result = MealQuery().get_meal(m["id"])

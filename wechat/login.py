@@ -82,4 +82,22 @@ def user_login(request):
 
     return JsonResponse(resp)
 
+@csrf_exempt
+def check_token(request):
+    if {"wechat_uid", "token"} <= set(request.POST):
+        try:
+            uid = int(request.POST["wechat_uid"])
+            if uid < 1:
+                raise Exception("invalid wechat uid")
+            token = request.POST["token"] 
+            comment = request.POST["comment"] 
 
+            if RedisQuery.verify_token(uid, token) == False:
+                return JsonResponse(errors.InvalidToken().dict(), safe = False)
+
+            return JsonResponse(errors.StatusOK("OK").dict(), safe = False)
+        except Exception as e:
+            return JsonResponse(errors.StatusError(str(e)).dict(), safe = False)
+
+
+    return JsonResponse(errors.InvalidToken().dict(), safe = False)
