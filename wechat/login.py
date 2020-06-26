@@ -90,7 +90,6 @@ def check_token(request):
             if uid < 1:
                 raise Exception("invalid wechat uid")
             token = request.POST["token"] 
-            comment = request.POST["comment"] 
 
             if RedisQuery.verify_token(uid, token) == False:
                 return JsonResponse(errors.InvalidToken().dict(), safe = False)
