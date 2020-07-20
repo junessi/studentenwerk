@@ -2,7 +2,7 @@
 #coding=utf-8
 
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 from .query import Query
 
@@ -13,8 +13,10 @@ class User(Query):
     id = Column(Integer, primary_key = True)
     name = Column(String)
     openid = Column(String)
+    last_commit_timestamp = Column(DateTime)
 
-    def __init__(self, openid = ""):
+    def __init__(self, id, openid = ""):
+        self.id = id
         self.openid = openid
 
     def query_info(self):
@@ -26,10 +28,11 @@ class User(Query):
     def dict(self):
         return {"id": self.id,
                 "name": self.name,
-                "openid": self.openid}
+                "openid": self.openid,
+                "last_commit_timestamp": self.last_commit_timestamp}
 
     def __str__(self):
-        return "User<{0}, \"{1}\">".format(self.id, self.name)
+        return "User<{0}, \"{1}\", \"{2}\">".format(self.id, self.name, self.openid)
 
 class UserQuery:
     def get_user_info(self, user_id):

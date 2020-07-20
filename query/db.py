@@ -28,8 +28,13 @@ class DB:
         session = Session()
         result = []
         try:
-            session.add(obj)
-            session.commit()
+            obj_session = session.object_session(obj)
+            if obj_session is not None:
+                obj_session.add(obj)
+                obj_session.commit()
+            else:
+                session.add(obj)
+                session.commit()
             ret = True
         except:
             session.rollback()

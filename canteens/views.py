@@ -7,6 +7,8 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from query.meal import MealQuery, Meal
 from django.views.decorators.csrf import csrf_exempt
+from query.user import UserQuery
+from datetime import datetime
 
 base_url = "https://api.studentenwerk-dresden.de/openmensa/v2"
 
@@ -54,6 +56,7 @@ def canteen_meals(request, canteen_id, date):
                     "likes": 0
                  }]
     """
+
 
     if type(meals) is dict and {"status", "message"} <= set(meals):
         return JsonResponse(meals, safe = False)
@@ -127,8 +130,11 @@ def canteen_meal_detail(request, canteen_id, date, meal_id):
         liked_users = array.array('L', meal.liked_users).tolist()
 
         if {"action", "wechat_uid", "token"} <= set(request.POST):
+            try:
+                uid = int(request.POST["wechat_uid"]) 
+            except Exception as e:
+                return JsonResponse(errors.StatusError("not logged in").dict(), safe = False)
             action = request.POST["action"] 
-            uid = int(request.POST["wechat_uid"]) 
             token = request.POST["token"] 
             meal_info["action"] = action
 
@@ -187,18 +193,34 @@ def add_canteen_comment(request, canteen_id):
         uid = int(request.POST["wechat_uid"])
         if uid < 1:
             raise Exception("invalid wechat uid")
+
+        users = UserQuery().get_user_info(uid)
+        if len(users) < 1:
+            raise Exception("user not found")
+
+        user = users[0]
+        last = int(datetime.timestamp(user.last_commit_timestamp))
+        now = int(datetime.timestamp(datetime.now()))
+        if (last + 300) > now:
+            # last commit is not older than 5 minutes
+            raise Exception("too frequently")
+
+        token = request.POST["token"] 
+        comment = request.POST["comment"] 
+
+        # verify user token
+        if RedisQuery.verify_token(uid, token) == False:
+            raise Exception("invalid token")
+
+        if RedisQuery.add_canteen_comment(canteen_id, comment) == False:
+            raise Exception("failed to add comment")
+
+        # update last commit timestamp
+        user.last_commit_timestamp = datetime.now()
+        user.save()
+
     except Exception as e:
         return JsonResponse(errors.StatusError(str(e)).dict(), safe = False)
-
-    token = request.POST["token"] 
-    comment = request.POST["comment"] 
-
-    # verify user token
-    if RedisQuery.verify_token(uid, token) == False:
-        return JsonResponse(errors.InvalidToken().dict(), safe = False)
-
-    if RedisQuery.add_canteen_comment(canteen_id, comment) == False:
-        return JsonResponse(errors.StatusError("failed to add comment").dict(), safe = False)
 
     return JsonResponse(errors.StatusOK("one comment added").dict(), safe = False)
 
