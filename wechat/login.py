@@ -55,7 +55,7 @@ def user_login(request):
         if "openid" in data:
             openid = data["openid"]
 
-            user = User(openid)
+            user = User(openid=openid)
             uq = UserQuery()
             if len(uq.get_user_by_openid(openid)) == 0:
                 user.save()

@@ -15,9 +15,12 @@ class User(Query):
     openid = Column(String)
     last_commit_timestamp = Column(DateTime)
 
-    def __init__(self, id, openid = ""):
-        self.id = id
-        self.openid = openid
+    def __init__(self, id = None, openid = ""):
+        if id is not None:
+            self.id = id
+
+        if len(openid):
+            self.openid = openid
 
     def query_info(self):
         return self.query(User).filter_by(id=self.id).all()
@@ -36,8 +39,8 @@ class User(Query):
 
 class UserQuery:
     def get_user_info(self, user_id):
-        return User(user_id).query_info()
+        return User(id=user_id).query_info()
 
     def get_user_by_openid(self, openid):
-        return User(0).query(User).filter_by(openid=openid).all()
+        return User().query(User).filter_by(openid=openid).all()
 
