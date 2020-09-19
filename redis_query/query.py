@@ -121,3 +121,21 @@ def add_canteen_comment(cid, comment):
         return True
     except:
         return False
+
+def cache_meals(cid, meals):
+    try:
+        r = redis.Redis()
+        key = "{0}{1}_canteenid_{2}".format(prefix_app, "cached_meals", cid)
+        r.delete(key)
+        for m in meals:
+            r.lpush(key, m["id"])
+    except:
+        return []
+
+def get_cached_meals(cid):
+    try:
+        r = redis.Redis()
+        key = "{0}{1}_canteenid_{2}".format(prefix_app, "cached_meals", cid)
+        return r.lrange(key, 0, -1)
+    except:
+        return []

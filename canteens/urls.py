@@ -4,6 +4,7 @@ from canteens import views
 
 urlpatterns = [
     re_path(r'^$', views.list_canteens),
+    re_path(r'^cache_meals$', views.cache_meals),
     re_path(r'^(?P<canteen_id>[\d]+)/$', views.canteen_info),
     re_path(r'^(?P<canteen_id>[\d]+)/days$', views.canteen_dates),
     re_path(r'^(?P<canteen_id>[\d]+)/days/(?P<date>[\d]{4}-[\d]{2}-[\d]{2})/$', views.canteen_date),

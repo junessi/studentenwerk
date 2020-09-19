@@ -131,11 +131,11 @@ def canteen_meal_detail(request, canteen_id, date, meal_id):
 
         if {"action", "wechat_uid", "token"} <= set(request.POST):
             try:
-                uid = int(request.POST["wechat_uid"]) 
+                uid = int(request.POST["wechat_uid"])
             except Exception as e:
                 return JsonResponse(errors.StatusError("not logged in").dict(), safe = False)
-            action = request.POST["action"] 
-            token = request.POST["token"] 
+            action = request.POST["action"]
+            token = request.POST["token"]
             meal_info["action"] = action
 
             # verify user token
@@ -164,7 +164,7 @@ def canteen_meal_detail(request, canteen_id, date, meal_id):
     return JsonResponse(meal_info, safe = False)
 
 def likes(request, canteen_id, date, meal_id):
-    
+
     resp = {"status": 200, "liked_users": []}
     result = MealQuery().get_meal(meal_id)
 
@@ -205,8 +205,8 @@ def add_canteen_comment(request, canteen_id):
             # last commit is not older than 5 minutes
             raise Exception("too frequently")
 
-        token = request.POST["token"] 
-        comment = request.POST["comment"] 
+        token = request.POST["token"]
+        comment = request.POST["comment"]
 
         # verify user token
         if RedisQuery.verify_token(uid, token) == False:
@@ -224,3 +224,46 @@ def add_canteen_comment(request, canteen_id):
 
     return JsonResponse(errors.StatusOK("one comment added").dict(), safe = False)
 
+@csrf_exempt
+def cache_meals(request):
+    if {"wechat_uid", "token"} > set(request.POST):
+        return JsonResponse(errors.StatusError("missing argument").dict(), safe = False)
+
+    try:
+        uid = int(request.POST["wechat_uid"])
+        if uid < 1:
+            raise Exception("invalid wechat uid")
+
+        users = UserQuery().get_user_info(uid)
+        if len(users) < 1 or users[0].openid != "meal-caching":
+            raise Exception("user not found")
+
+        # verify user token
+        token = request.POST["token"]
+        if RedisQuery.verify_token(uid, token) == False:
+            raise Exception("invalid token")
+
+        # get all canteens
+        url = base_url + "/canteens"
+        canteens = requests.get(url).json()
+
+        all_cached_meals = dict()
+        today = datetime.today().strftime("%Y-%m-%d")
+        for c in canteens:
+            canteen_id = c["id"]
+
+            # get meals of today
+            url = base_url + "/canteens/" + str(canteen_id) + "/days/" + today + "/meals/"
+            meals = requests.get(url).json()
+
+            RedisQuery.cache_meals(canteen_id, meals)
+            cached_meals = RedisQuery.get_cached_meals(canteen_id)
+
+            all_cached_meals[canteen_id] = [x.decode('utf-8') for x in cached_meals]
+
+        msg = errors.StatusOK().dict()
+        msg["cached_meals"] = all_cached_meals
+        return JsonResponse(msg, safe = False)
+
+    except Exception as e:
+        return JsonResponse(errors.StatusError(str(e)).dict(), safe = False)
