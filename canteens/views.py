@@ -267,3 +267,12 @@ def cache_meals(request):
 
     except Exception as e:
         return JsonResponse(errors.StatusError(str(e)).dict(), safe = False)
+
+
+def cached_meals(request, canteen_id):
+    cached_meals = RedisQuery.get_cached_meals(canteen_id)
+
+    resp = errors.StatusOK().dict()
+    resp["cached_meals"] = cached_meals
+
+    return JsonResponse(resp, safe = False)
