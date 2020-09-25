@@ -273,6 +273,6 @@ def cached_meals(request, canteen_id):
     cached_meals = RedisQuery.get_cached_meals(canteen_id)
 
     resp = errors.StatusOK().dict()
-    resp["cached_meals"] = cached_meals
+    resp["cached_meals"] = [int(x.decode('utf-8')) for x in cached_meals]
 
     return JsonResponse(resp, safe = False)
