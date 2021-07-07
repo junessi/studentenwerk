@@ -38,23 +38,24 @@ def canteen_meals(request, canteen_id, date):
     meals = requests.get(url).json()
 
     """
-    meals = [{ "id": 260,
-                    "name": "Gemüse-Couscouspfanne mit Joghurt-Ingwer-Dip, dazu bunter Blattsalat",
-                    "image": "https://static.studentenwerk-dresden.de/bilder/mensen/studentenwerk-dresden-lieber-mensen-gehen.jpg",
-                    "notes": ["ovo-lacto-vegetabil", "mensaVital"],
-                    "prices": {"students": 2.3, "employees": 3.65, "others": 4.6},
-                    "category": "Alternativ-Angebot",
-                    "likes": 0
-                 },
-                 {
-                    "id": 10900,
-                    "name": "Hähnchenschnitzel mit Brötchen",
-                    "image": "https://static.studentenwerk-dresden.de/bilder/mensen/studentenwerk-dresden-lieber-mensen-gehen.jpg",
-                    "notes": [],
-                    "prices": { "pupils": 2.4, "others": 4.3},
-                    "category": "Cafeteria Heiße Theke",
-                    "likes": 0
-                 }]
+    meals = [{
+                "id": 260,
+                "name": "Gemüse-Couscouspfanne mit Joghurt-Ingwer-Dip, dazu bunter Blattsalat",
+                "image": "https://static.studentenwerk-dresden.de/bilder/mensen/studentenwerk-dresden-lieber-mensen-gehen.jpg",
+                "notes": ["ovo-lacto-vegetabil", "mensaVital"],
+                "prices": {"students": 2.3, "employees": 3.65, "others": 4.6},
+                "category": "Alternativ-Angebot",
+                "likes": 0
+             },
+             {
+                "id": 10900,
+                "name": "Hähnchenschnitzel mit Brötchen",
+                "image": "https://static.studentenwerk-dresden.de/bilder/mensen/studentenwerk-dresden-lieber-mensen-gehen.jpg",
+                "notes": [],
+                "prices": { "pupils": 2.4, "others": 4.3},
+                "category": "Cafeteria Heiße Theke",
+                "likes": 0
+             }]
     """
 
 
@@ -230,25 +231,14 @@ def cache_meals(request):
         return JsonResponse(errors.StatusError("missing argument").dict(), safe = False)
 
     try:
-        uid = int(request.POST["wechat_uid"])
-        if uid < 1:
-            raise Exception("invalid wechat uid")
-
-        users = UserQuery().get_user_info(uid)
-        if len(users) < 1 or users[0].openid != "meal-caching":
-            raise Exception("user not found")
-
-        # verify user token
-        token = request.POST["token"]
-        if RedisQuery.verify_token(uid, token) == False:
-            raise Exception("invalid token")
-
         # get all canteens
         url = base_url + "/canteens"
         canteens = requests.get(url).json()
 
         all_cached_meals = dict()
         today = datetime.today().strftime("%Y-%m-%d")
+        cached_today = RedisQuery.get_today()
+
         for c in canteens:
             canteen_id = c["id"]
 
@@ -256,9 +246,25 @@ def cache_meals(request):
             url = base_url + "/canteens/" + str(canteen_id) + "/days/" + today + "/meals/"
             meals = requests.get(url).json()
 
-            RedisQuery.cache_meals(canteen_id, meals)
-            cached_meals = RedisQuery.get_cached_meals(canteen_id)
+            # fake data
+            """
+            if canteen_id == 4:
+                meals.append({"id": 5})
+                meals.append({"id": 6})
+                # meals.append({"id": 3})
+                # meals.append({"id": 4})
+                """
 
+            if today != cached_today:
+                RedisQuery.cache_meals(canteen_id, meals, today)
+            else:
+                cached_meals = RedisQuery.get_cached_meals(canteen_id)
+                for meal_id in [m["id"] for m in meals]:
+                    if meal_id not in cached_meals:
+                        cached_meals.append(meal_id)
+                RedisQuery.cache_meals(canteen_id, meals)
+
+            cached_meals = RedisQuery.get_cached_meals(canteen_id)
             all_cached_meals[canteen_id] = [x.decode('utf-8') for x in cached_meals]
 
         msg = errors.StatusOK().dict()
@@ -269,8 +275,10 @@ def cache_meals(request):
         return JsonResponse(errors.StatusError(str(e)).dict(), safe = False)
 
 
-def cached_meals(request, canteen_id):
-    cached_meals = RedisQuery.get_cached_meals(canteen_id)
+def cached_meals(request, canteen_id, date = ""):
+    if len(date) == 0:
+        date = RedisQuery.get_today()
+    cached_meals = RedisQuery.get_cached_meals(canteen_id, date)
 
     resp = errors.StatusOK().dict()
     resp["cached_meals"] = [int(x.decode('utf-8')) for x in cached_meals]

@@ -2,7 +2,7 @@
 #coding=utf-8
 
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Binary, ForeignKey, Table, PrimaryKeyConstraint
+from sqlalchemy import Column, Integer, String, LargeBinary, ForeignKey, Table, PrimaryKeyConstraint
 from sqlalchemy.orm import relationship
 from .query import Query
 import array
@@ -12,7 +12,7 @@ class Meal(Query):
     __tablename__ = 'meal'
 
     id = Column(Integer, primary_key = True)
-    liked_users = Column(Binary)
+    liked_users = Column(LargeBinary)
 
     def __init__(self, id):
         self.id = id

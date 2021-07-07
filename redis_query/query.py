@@ -122,20 +122,29 @@ def add_canteen_comment(cid, comment):
     except:
         return False
 
-def cache_meals(cid, meals):
+def cache_meals(cid, meals, date):
     try:
         r = redis.Redis()
-        key = "{0}{1}_canteenid_{2}".format(prefix_app, "cached_meals", cid)
+        key = "{0}{1}_canteenid_{2}_{3}".format(prefix_app, "cached_meals", cid, date)
         r.delete(key)
         for m in meals:
             r.lpush(key, m["id"])
+        r.expire(key, 7*24*3600) # expire after a week
+        return True
     except:
-        return []
+        return False
 
-def get_cached_meals(cid):
+def get_cached_meals(cid, date):
     try:
         r = redis.Redis()
-        key = "{0}{1}_canteenid_{2}".format(prefix_app, "cached_meals", cid)
+        key = "{0}{1}_canteenid_{2}_{3}".format(prefix_app, "cached_meals", cid, date)
         return r.lrange(key, 0, -1)
     except:
         return []
+
+def get_today():
+    try:
+        r = redis.Redis()
+        return r.get("today")
+    except:
+        return ""
