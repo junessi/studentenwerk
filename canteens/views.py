@@ -255,16 +255,18 @@ def cache_meals(request):
                 # meals.append({"id": 4})
                 """
 
-            if today != cached_today:
-                RedisQuery.cache_meals(canteen_id, meals, today)
-            else:
-                cached_meals = RedisQuery.get_cached_meals(canteen_id)
+            cached_meals = RedisQuery.get_cached_meals(canteen_id, today)
+            if len(cached_meals) > 0:
+                # add potential new meal to cached meal list
                 for meal_id in [m["id"] for m in meals]:
                     if meal_id not in cached_meals:
                         cached_meals.append(meal_id)
                 RedisQuery.cache_meals(canteen_id, meals)
+            else:
+                # meals not cached for date
+                RedisQuery.cache_meals(canteen_id, meals, today)
 
-            cached_meals = RedisQuery.get_cached_meals(canteen_id)
+            cached_meals = RedisQuery.get_cached_meals(canteen_id, today)
             all_cached_meals[canteen_id] = [x.decode('utf-8') for x in cached_meals]
 
         msg = errors.StatusOK().dict()
@@ -277,10 +279,11 @@ def cache_meals(request):
 
 def cached_meals(request, canteen_id, date = ""):
     if len(date) == 0:
-        date = RedisQuery.get_today()
+        date = RedisQuery.get_today().decode('utf-8')
     cached_meals = RedisQuery.get_cached_meals(canteen_id, date)
 
     resp = errors.StatusOK().dict()
     resp["cached_meals"] = [int(x.decode('utf-8')) for x in cached_meals]
+    resp["date"] = date
 
     return JsonResponse(resp, safe = False)
