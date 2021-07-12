@@ -280,7 +280,7 @@ def cache_meals(request):
 def cached_meals(request, canteen_id, date = ""):
     if len(date) == 0:
         date = RedisQuery.get_today().decode('utf-8')
-    cached_meals = RedisQuery.get_cached_meals(canteen_id, date)
+    cached_meals = RedisQuery.get_cached_meal_ids(canteen_id, date)
 
     resp = errors.StatusOK().dict()
     resp["cached_meals"] = [int(x.decode('utf-8')) for x in cached_meals]
