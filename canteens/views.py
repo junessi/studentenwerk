@@ -235,7 +235,7 @@ def cache_meals(request):
         url = base_url + "/canteens"
         canteens = requests.get(url).json()
 
-        all_cached_meals = dict()
+        all_cached_meal_ids = dict()
         today = datetime.today().strftime("%Y-%m-%d")
         cached_today = RedisQuery.get_today()
 
@@ -250,27 +250,27 @@ def cache_meals(request):
             """
             if canteen_id == 4:
                 meals.append({"id": 5})
-                meals.append({"id": 6})
+                # meals.append({"id": 6})
                 # meals.append({"id": 3})
                 # meals.append({"id": 4})
                 """
 
-            if RedisQuery.has_cached_meals(canteen_id, today):
-                cached_meals = RedisQuery.get_cached_meals(canteen_id, today)
+            if RedisQuery.has_cached_meal_ids(canteen_id, today):
+                cached_meal_ids = RedisQuery.get_cached_meal_ids(canteen_id, today)
                 # add potential new meal to cached meal list
                 for meal_id in [m["id"] for m in meals]:
-                    if meal_id not in cached_meals:
-                        cached_meals.append(meal_id)
-                RedisQuery.cache_meals(canteen_id, meals)
+                    if meal_id not in [int(x.decode('utf-8')) for x in cached_meal_ids]:
+                        cached_meal_ids.append(meal_id)
+                RedisQuery.cache_meal_ids(canteen_id, cached_meal_ids, today)
             else:
                 # meals not cached for date
-                RedisQuery.cache_meals(canteen_id, meals, today)
+                RedisQuery.cache_meal_ids(canteen_id, [m["id"] for m in meals], today)
 
-            cached_meals = RedisQuery.get_cached_meals(canteen_id, today)
-            all_cached_meals[canteen_id] = [x.decode('utf-8') for x in cached_meals]
+            cached_meal_ids = RedisQuery.get_cached_meal_ids(canteen_id, today)
+            all_cached_meal_ids[canteen_id] = [int(x.decode('utf-8')) for x in cached_meal_ids]
 
         msg = errors.StatusOK().dict()
-        msg["cached_meals"] = all_cached_meals
+        msg["cached_meals"] = all_cached_meal_ids
         return JsonResponse(msg, safe = False)
 
     except Exception as e:
