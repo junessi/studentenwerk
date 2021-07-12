@@ -134,6 +134,15 @@ def cache_meals(cid, meals, date):
     except:
         return False
 
+def has_cached_meals(cid, date):
+    try:
+        r = redis.Redis()
+        key = "{0}{1}_canteenid_{2}_{3}".format(prefix_app, "cached_meals", cid, date)
+
+        return r.exists(key)
+    except:
+        return False
+
 def get_cached_meals(cid, date):
     try:
         r = redis.Redis()

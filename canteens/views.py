@@ -255,8 +255,8 @@ def cache_meals(request):
                 # meals.append({"id": 4})
                 """
 
-            cached_meals = RedisQuery.get_cached_meals(canteen_id, today)
-            if len(cached_meals) > 0:
+            if RedisQuery.has_cached_meals(canteen_id, today):
+                cached_meals = RedisQuery.get_cached_meals(canteen_id, today)
                 # add potential new meal to cached meal list
                 for meal_id in [m["id"] for m in meals]:
                     if meal_id not in cached_meals:
