@@ -122,7 +122,7 @@ def add_canteen_comment(cid, comment):
     except:
         return False
 
-def cache_meal_ids(cid, meal_ids, date):
+def cache_meal_ids(cid, date, meal_ids):
     try:
         r = redis.Redis()
         key = "{0}{1}_canteenid_{2}_{3}".format(prefix_app, "cached_meals", cid, date)

@@ -62,6 +62,7 @@ def canteen_meals(request, canteen_id, date):
     if type(meals) is dict and {"status", "message"} <= set(meals):
         return JsonResponse(meals, safe = False)
 
+    """
     # extend meal info
     for m in meals:
         result = MealQuery().get_meal(m["id"])
@@ -86,6 +87,7 @@ def canteen_meals(request, canteen_id, date):
         else:
             meal = Meal(m["id"])
             meal.save()
+    """
 
     return JsonResponse(meals, safe = False)
 
@@ -96,15 +98,15 @@ def canteen_meal_detail(request, canteen_id, date, meal_id):
 
     """
     meal_info = {"status": 404, "message": "meal not found"}
-    if int(meal_id) == 260:
+    if int(meal_id) == 257512:
         meal_info = {
-                        "id": 260,
+                        "id": 257512,
                         "name": "Gemüse-Couscouspfanne mit Joghurt-Ingwer-Dip, dazu bunter Blattsalat",
                         "image": "https://static.studentenwerk-dresden.de/bilder/mensen/studentenwerk-dresden-lieber-mensen-gehen.jpg",
                         "notes": ["ovo-lacto-vegetabil", "mensaVital"],
                         "prices": {"students": 2.3, "employees": 3.65, "others": 4.6},
                         "category": "Alternativ-Angebot",
-                        "likes": 0
+                        "status": 200
                      }
 
     elif int(meal_id) == 10900:
@@ -119,11 +121,8 @@ def canteen_meal_detail(request, canteen_id, date, meal_id):
                      }
                      """
 
-    meal_info["likes"] = 0
-    meal_info["liked"] = False
     wechat_uid = 0
     liked_users = []
-    updated = False
     result = MealQuery().get_meal(meal_id)
 
     if len(result):
@@ -143,25 +142,8 @@ def canteen_meal_detail(request, canteen_id, date, meal_id):
             if RedisQuery.verify_token(uid, token) == False:
                 return JsonResponse(errors.InvalidToken().dict(), safe = False)
 
-            if action == "like":
-                if uid not in liked_users:
-                    liked_users.append(uid)
-                    meal_info["liked"] = True
+        meal_info["status"] = 200
 
-                    updated = True
-            elif action == "dislike":
-                if uid in liked_users:
-                    liked_users.remove(uid)
-
-                    updated = True
-
-            if updated:
-                meal.liked_users = array.array('L', liked_users)
-                meal.update_data()
-
-        meal_info["likes"] = len(liked_users)
-
-    meal_info["status"] = 200
     return JsonResponse(meal_info, safe = False)
 
 def likes(request, canteen_id, date, meal_id):
@@ -237,40 +219,42 @@ def cache_meals(request):
 
         all_cached_meal_ids = dict()
         today = datetime.today().strftime("%Y-%m-%d")
-        cached_today = RedisQuery.get_today()
 
+        resp = {}
         for c in canteens:
             canteen_id = c["id"]
 
             # get meals of today
             url = base_url + "/canteens/" + str(canteen_id) + "/days/" + today + "/meals/"
             meals = requests.get(url).json()
+            meal_ids = [int(m["id"]) for m in meals]
 
             # fake data
-            """
-            if canteen_id == 4:
-                meals.append({"id": 5})
-                # meals.append({"id": 6})
-                # meals.append({"id": 3})
-                # meals.append({"id": 4})
-                """
+            # if canteen_id == 4:
+                # meal_ids.append(257512)
 
             if RedisQuery.has_cached_meal_ids(canteen_id, today):
                 cached_meal_ids = RedisQuery.get_cached_meal_ids(canteen_id, today)
                 # add potential new meal to cached meal list
-                for meal_id in [m["id"] for m in meals]:
+                for meal_id in meal_ids:
                     if meal_id not in [int(x.decode('utf-8')) for x in cached_meal_ids]:
-                        cached_meal_ids.append(meal_id)
-                RedisQuery.cache_meal_ids(canteen_id, cached_meal_ids, today)
+                        meal_id_str = "{}".format(meal_id)
+                        cached_meal_ids.append(meal_id_str.encode('utf-8'))
+                        # if canteen_id == 4:
+                            # return JsonResponse({"cached_meal_ids": [int(x.decode('utf-8')) for x in cached_meal_ids], "meal_id": meal_id}, safe = False)
+                RedisQuery.cache_meal_ids(canteen_id, today, cached_meal_ids)
             else:
+                # if canteen_id == 4:
+                    # return JsonResponse({"cached": True}, safe = False)
                 # meals not cached for date
-                RedisQuery.cache_meal_ids(canteen_id, [m["id"] for m in meals], today)
+                RedisQuery.cache_meal_ids(canteen_id, today, meal_ids)
 
             cached_meal_ids = RedisQuery.get_cached_meal_ids(canteen_id, today)
             all_cached_meal_ids[canteen_id] = [int(x.decode('utf-8')) for x in cached_meal_ids]
 
         msg = errors.StatusOK().dict()
         msg["cached_meals"] = all_cached_meal_ids
+        msg["test"] = resp
         return JsonResponse(msg, safe = False)
 
     except Exception as e:
@@ -279,7 +263,7 @@ def cache_meals(request):
 
 def cached_meals(request, canteen_id, date = ""):
     if len(date) == 0:
-        date = RedisQuery.get_today().decode('utf-8')
+        date = datetime.today().strftime("%Y-%m-%d")
     cached_meals = RedisQuery.get_cached_meal_ids(canteen_id, date)
 
     resp = errors.StatusOK().dict()
